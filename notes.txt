@@ -1,0 +1,16 @@
+Basic description of the game:
+
+A user has to get a random word by guessing each character of the word. If guessed correctly, the character of the word appears in the position of the word to be guessed, and is able to select an additional character. If the user incorrectly guesses (a character not included in the word), this would result in a failed attempt. The user gets 6 failed attemps total to determine the word (this can change with added functionality). Each failed attemp is representive of a body part (1.Head, 2. body, 3. arm-one, 4. arm-two, 5. leg-one, 6.leg-two).
+If the word is guessed correctly, it would result in a win. If the number of attemps is exhausted, the game is lost. 
+
+
+Variables and methods:
+
+number_guess_attemps = 0
+length_of_string = string.length
+usage of session[:<id tags>] in order to save information about the game. 
+
+
+Remember that http is stateless. It doesn't carry any meta data or send information about previous requests or responses. 
+
+Think about the home.erb and how the form sends information to the web server through a request. The web server then sends a response, which tells the client (google chrome) at least the status code (everything ok?)
