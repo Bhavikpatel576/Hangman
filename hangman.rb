@@ -7,14 +7,14 @@ require "yaml"
 require "pry"
 
 configure do 
-	enable :session
+	enable :sessions
 	set :erb, :escape_html => true
 end
 
 before do
 	@string = "concentrate"
+	session[:attempts] ||= 6
 end
-
 
 def validate_character(letter)
 	@string.include?(letter)
@@ -32,27 +32,33 @@ def add_letter(letter, answer_string)
 	end
 end
 
+def check_game_status
+	session[:string_answer] == session[:word]
+
 get "/" do
 	@string_answer = session[:string_answer]
-	binding.pry
-	erb :home, layout: :layout
+	if check_game_status
+		redirect "/end"
+	else
+		erb :home, layout: :layout
+	end
 end
 
 get "/new" do
-	# session[:string_answer] = Array.new(@string.length) { |v| v = '-' }
-	session[:string_answer] = ["a","b"]
-	binding.pry
-	redirect "/"
+	session[:word] = @string.chars
+	session[:string_answer] = Array.new(@string.length) { |v| v = '-' }
+	redirect to("/")
 end
 
 get "/end" do 
-
+	erb :gameover
 end
 
 post "/" do 
 	letter = params[:guess]
 	add_letter(letter, session[:string_answer])
 	@string_answer = session[:string_answer]
-	erb :home, layout: :layout
+	redirect "/"
+	# erb :home, layout: :layout
 end
 
