@@ -2,7 +2,6 @@ require "sinatra"
 require "sinatra/reloader" if development?
 require "tilt/erubis"
 require "sinatra/content_for"
-require "redcarpet"
 require "yaml"
 require "pry"
 
@@ -11,29 +10,44 @@ configure do
 	set :erb, :escape_html => true
 end
 
-before do
-	@string = "concentrate"
-	session[:attempts] ||= 6
-end
+# before do
+# 	@string = File.read("../data/world_list.txt")
+# 	binding.pry
+# end
 
 def validate_character(letter)
-	@string.include?(letter)
+	session[:word].include?(letter)
 end
 
 def add_letter(letter, answer_string)
 	if validate_character(letter) #this line doesn't account for number of attempts
-		@string.chars.each_with_index do |word_char, idx|
+		session[:word].chars.each_with_index do |word_char, idx|
 			if word_char == letter
 				answer_string[idx] = word_char
 			end
 		end
 	else
+		session[:incorrect_letters] << letter
 		session[:attempts] -= 1
 	end
 end
 
 def check_game_status
-	session[:string_answer] == session[:word]
+	return true if session[:attempts] == 0
+	session[:string_answer] == session[:word].chars
+end
+
+def valid_letter?(letter)
+	!session[:incorrect_letters].include?(letter)
+end
+
+def data_path
+	if ENV["RACK_ENV"] == "test"
+		File.expand_path("../test/data", __FILE__)
+	else
+		File.expand_path("../data", __FILE__)
+	end
+end
 
 get "/" do
 	@string_answer = session[:string_answer]
@@ -45,20 +59,34 @@ get "/" do
 end
 
 get "/new" do
-	session[:word] = @string.chars
+	content = File.readlines("data/word_list.txt")
+	@string = content[rand(content.size)].chomp
+	session[:word] = @string
+	session[:attempts] = 6
 	session[:string_answer] = Array.new(@string.length) { |v| v = '-' }
-	redirect to("/")
+	session[:incorrect_letters] = []
+	redirect "/"
 end
 
 get "/end" do 
-	erb :gameover
+	@test = if session[:attempts] == 0
+		"lost"
+	elsif session[:string_answer] == session[:word]
+		"won"
+	end
+	erb :gameover, layout: :layout
 end
 
 post "/" do 
 	letter = params[:guess]
-	add_letter(letter, session[:string_answer])
-	@string_answer = session[:string_answer]
-	redirect "/"
-	# erb :home, layout: :layout
+	if valid_letter?(letter)
+		add_letter(letter, session[:string_answer])
+		@string_answer = session[:string_answer]
+		redirect "/"
+	else
+		session[:message] = "You've already entered that letter"
+		@string_answer = session[:string_answer]
+		erb :home, layout: :layout
+	end
 end
 

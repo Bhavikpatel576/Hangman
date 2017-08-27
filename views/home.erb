@@ -10,9 +10,21 @@
 <!-- #create a text box for the user to make inputs
 #have a submit button to submit the post -->
 
+<p>current letters guessed</p>
+
+<ul>
+<% session[:incorrect_letters].each do |char|%>
+	<li>
+	<p class="word"><%=char%> </p>
+	</li>
+<%end%>
+</ul>
+
+<p> You have <%=session[:attempts]%> attempts left</p>
+
 <form action = "/" method="post">
-	<input name="guess" placeholder="enter a character", type="text" maxlength=1 value="<%=params[:guess]%>">
-	<fieldset class="actions">
+	<input type="inherit" name="guess" placeholder="enter a character", type="text" maxlength=1 value="<%=params[:guess]%>">
 		<input type="submit" values="Save">
-	</fieldset>
 </form>
+
+<a href= "/new" target=_blank title="Submit Link" contenteditable="false">Start Over?</a>
