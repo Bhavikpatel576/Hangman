@@ -14,3 +14,14 @@ usage of session[:<id tags>] in order to save information about the game.
 Remember that http is stateless. It doesn't carry any meta data or send information about previous requests or responses. 
 
 Think about the home.erb and how the form sends information to the web server through a request. The web server then sends a response, which tells the client (google chrome) at least the status code (everything ok?)
+
+
+
+Deploying the app:
+1. install heroku command line interface (CLI) and make sure you can log in using 'heroku login'
+2. Make a git repository and upload all files. 
+3. require "sinatra/reloader" if devlopment?prevents the app from reloading in a production environment.
+4. configure gem file to use puma in production
+5. create a config.ru (tells the web server how to run application)
+6. Create a Procfile (take the snipt of code from the Heroku docs)
+7. 
