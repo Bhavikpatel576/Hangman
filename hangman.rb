@@ -3,17 +3,11 @@ require "sinatra/reloader" if development?
 require "tilt/erubis"
 require "sinatra/content_for"
 require "yaml"
-require "pry"
 
 configure do 
 	enable :sessions
 	set :erb, :escape_html => true
 end
-
-# before do
-# 	@string = File.read("../data/world_list.txt")
-# 	binding.pry
-# end
 
 def validate_character(letter)
 	session[:word].include?(letter)
@@ -50,6 +44,9 @@ def data_path
 end
 
 get "/" do
+	if session[:gameover] == true || session[:word] == nil
+		redirect "/new"
+	end
 	@string_answer = session[:string_answer]
 	if check_game_status
 		redirect "/end"
@@ -62,6 +59,7 @@ get "/new" do
 	content = File.readlines("data/word_list.txt")
 	@string = content[rand(content.size)].chomp
 	session[:word] = @string
+	session[:gameover] = false
 	session[:attempts] = 6
 	session[:string_answer] = Array.new(@string.length) { |v| v = '-' }
 	session[:incorrect_letters] = []
@@ -69,6 +67,7 @@ get "/new" do
 end
 
 get "/end" do 
+	session[:gameover] = true
 	@test = if session[:attempts] == 0
 		"lost"
 	elsif session[:string_answer] == session[:word]
