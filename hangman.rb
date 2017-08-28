@@ -32,7 +32,14 @@ def check_game_status
 end
 
 def valid_letter?(letter)
-	!session[:incorrect_letters].include?(letter)
+	if !/^[a-z]/.match(letter)
+		session[:message] = "Please enter a letter in the alphabet"
+		return false
+	elsif session[:incorrect_letters].include?(letter)
+		session[:message] = "You've already entered that letter"
+		return false
+	end
+	true
 end
 
 def data_path
@@ -58,7 +65,7 @@ end
 get "/new" do
 	content = File.readlines("data/word_list.txt")
 	@string = content[rand(content.size)].chomp
-	session[:word] = @string
+	session[:word] = @string.downcase
 	session[:gameover] = false
 	session[:attempts] = 6
 	session[:string_answer] = Array.new(@string.length) { |v| v = '-' }
@@ -77,13 +84,12 @@ get "/end" do
 end
 
 post "/" do 
-	letter = params[:guess]
+	letter = params[:guess].to_s.downcase
 	if valid_letter?(letter)
 		add_letter(letter, session[:string_answer])
 		@string_answer = session[:string_answer]
 		redirect "/"
 	else
-		session[:message] = "You've already entered that letter"
 		@string_answer = session[:string_answer]
 		erb :home, layout: :layout
 	end
